@@ -1,6 +1,7 @@
 version: '3.9'
 
 services:
+  # ─── Ollama (local LLM server) ───────────────────────────────────────────────
   ollama:
     image: ollama/ollama:latest
     container_name: rag_ollama
@@ -8,19 +9,19 @@ services:
       - ollama_data:/root/.ollama
     ports:
       - "11434:11434"
+    
     restart: unless-stopped
 
+  # ─── Model Puler (one-shot: pulls Mistral on first run) ─────────────────────
   ollama-init:
     image: ollama/ollama:latest
     container_name: rag_ollama_init
     depends_on:
-      - ollama
+     - ollama
     environment:
       - OLLAMA_HOST=http://ollama:11434
     entrypoint: >
       sh -c "
-        echo 'Waiting for Ollama to be ready...' &&
-        sleep 10 &&
         echo 'Pulling Mistral model...' &&
         ollama pull mistral &&
         echo 'Model ready!'
@@ -29,6 +30,7 @@ services:
       - ollama_data:/root/.ollama
     restart: "no"
 
+  # ─── Backend (FastAPI + LangChain + ChromaDB) ────────────────────────────────
   backend:
     image: rag-chatbot-backend
     build:
@@ -48,8 +50,15 @@ services:
       - ./backend/demo_pdfs:/app/demo_pdfs:ro
     ports:
       - "8000:8000"
-    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
 
+  # ─── Frontend (React + Nginx) ────────────────────────────────────────────────
   frontend:
     image: rag-chatbot-frontend
     build:
@@ -57,7 +66,7 @@ services:
       dockerfile: Dockerfile
     container_name: rag_frontend
     depends_on:
-      - backend
+     - backend
     ports:
       - "3000:80"
     restart: unless-stopped

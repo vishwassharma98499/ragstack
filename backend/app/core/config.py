@@ -20,15 +20,13 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
     OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "mistral")
 
-    # Groq fallback (for hosted environments)
+    # Groq fallback
     USE_GROQ: bool = os.getenv("USE_GROQ", "false").lower() == "true"
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
     GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama3-8b-8192")
 
     # Embeddings
-    EMBEDDING_MODEL: str = os.getenv(
-        "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
-    )
+    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 
     # ChromaDB
     CHROMA_PERSIST_DIR: str = os.getenv("CHROMA_PERSIST_DIR", "/data/chroma")
@@ -48,6 +46,15 @@ class Settings(BaseSettings):
     # Demo mode
     DEMO_MODE: bool = os.getenv("DEMO_MODE", "false").lower() == "true"
     DEMO_PDF_DIR: str = os.getenv("DEMO_PDF_DIR", "/app/demo_pdfs")
+
+    # ── Authentication (Azure AD SSO) ─────────────────────────────────────────
+    # Set AUTH_REQUIRED=false to skip auth in local dev (no Azure AD needed)
+    AUTH_REQUIRED: bool = os.getenv("AUTH_REQUIRED", "false").lower() == "true"
+    AZURE_TENANT_ID: str = os.getenv("AZURE_TENANT_ID", "")
+    AZURE_CLIENT_ID: str = os.getenv("AZURE_CLIENT_ID", "")
+    AZURE_CLIENT_SECRET: str = os.getenv("AZURE_CLIENT_SECRET", "")
+    REDIRECT_URI: str = os.getenv("REDIRECT_URI", "http://localhost:3000/auth/callback")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "change-me-in-production-use-32-chars-min")
 
     class Config:
         env_file = ".env"
