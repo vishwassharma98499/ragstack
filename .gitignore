@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.pyc
+.venv/
+venv/
+env/
+.env.local
+.env.production
+
+# Node / Frontend
+node_modules/
+frontend/dist/
+frontend/build/
+.npm
+*.tsbuildinfo
+
+# Data / Models (large files, don't commit)
+backend/data/
+data/
+*.chroma
+chroma_db/
+/data/
+
+# Uploads (user data, never commit)
+backend/uploads/
+uploads/
+
+# Demo PDFs (add only if small and licensed for redistribution)
+# backend/demo_pdfs/     <- uncomment to exclude
+
+# Environment files (contain secrets)
+.env
+backend/.env
+frontend/.env
+*.env.local
+*.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+ehthumbs.db
+Desktop.ini
+
+# Hugging Face model cache (large, downloaded automatically)
+.cache/
+~/.cache/huggingface/
+
+# pytest
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml

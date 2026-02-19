@@ -1,0 +1,69 @@
+version: '3.9'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rag_ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: rag_ollama_init
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    entrypoint: >
+      sh -c "
+        echo 'Waiting for Ollama to be ready...' &&
+        sleep 10 &&
+        echo 'Pulling Mistral model...' &&
+        ollama pull mistral &&
+        echo 'Model ready!'
+      "
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: "no"
+
+  backend:
+    image: rag-chatbot-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rag_backend
+    depends_on:
+      - ollama
+    env_file:
+      - ./backend/.env
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - CHROMA_PERSIST_DIR=/data/chroma
+      - UPLOAD_DIR=/data/uploads
+    volumes:
+      - rag_data:/data
+      - ./backend/demo_pdfs:/app/demo_pdfs:ro
+    ports:
+      - "8000:8000"
+    restart: on-failure
+
+  frontend:
+    image: rag-chatbot-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: rag_frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+    name: rag_ollama_models
+  rag_data:
+    name: rag_app_data
