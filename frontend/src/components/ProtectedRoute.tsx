@@ -16,8 +16,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   // If AUTH_REQUIRED=false (local dev), bypass auth entirely
   if (!authRequired) return <>{children}</>
-
-  if (!isAuthenticated) return <Navigate to="/login" replace />
-
+  const IS_DEMO = !import.meta.env.VITE_API_URL && import.meta.env.MODE === 'production'
+  if (!isAuthenticated && !IS_DEMO) return <Navigate to="/login" />
   return <>{children}</>
 }
