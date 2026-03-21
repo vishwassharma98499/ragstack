@@ -24,8 +24,8 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          REACT_APP_DEMO: "true"
-          PUBLIC_URL: "/ragstack"
+          VITE_DEMO: "true"
+          VITE_BASE: "/ragstack/"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist

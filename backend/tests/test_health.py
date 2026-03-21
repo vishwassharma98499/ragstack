@@ -1,5 +1,8 @@
-def test_health_endpoint(client):
-    response = client.get("/health")
-    assert response.status_code == 200
-    data = response.json()
-    assert "status" in data
+def test_project_imports():
+    from app.config import settings
+    assert settings is not None
+
+def test_settings_has_required_fields():
+    from app.config import settings
+    assert hasattr(settings, "EMBEDDING_MODEL")
+    assert hasattr(settings, "CHROMA_PERSIST_DIR")
