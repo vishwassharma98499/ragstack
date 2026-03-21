@@ -256,7 +256,7 @@ docchat-rag/
 > _Add screenshots here after running the app locally_
 
 | Upload & Chat | Source Citations |
-|---|---|---|
+|---|---|
 | ![Upload](.github/screenshots/upload.png) | ![Sources](.github/screenshots/sources.png) |
 
 ---
