@@ -12,6 +12,7 @@ const DEMO_RESPONSES: Record<string, string> = {
   aws: 'The AWS Well-Architected Framework defines five pillars: Operational Excellence, Security, Reliability, Performance Efficiency, and Cost Optimization. Your document emphasizes that security should never be traded for convenience, and recommends enabling CloudTrail, using IAM roles instead of long-lived keys, and encrypting data at rest.\n\n**Sources:** AWS Well-Architected Framework.pdf — Pillar 2: Security',
   default: 'Based on the uploaded documents, I can help with questions about Kubernetes operations, AWS architecture patterns, and Terraform infrastructure design. Try asking something specific like "What are Kubernetes resource limit best practices?" or "How should I structure Terraform modules?"',
 }
+
 import axios from 'axios'
 import type { Document, ChatRequest, ChatResponse, UploadResponse, HealthStatus } from '../types'
 
@@ -22,14 +23,12 @@ const api = axios.create({
   timeout: 120000,
 })
 
-// Inject auth token on every request
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('access_token')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
-// Auto-logout on 401
 api.interceptors.response.use(
   res => res,
   err => {
@@ -40,6 +39,12 @@ api.interceptors.response.use(
     return Promise.reject(err)
   }
 )
+
+function matchDemoResponse(request: ChatRequest): string {
+  const msg = JSON.stringify(request).toLowerCase()
+  const key = Object.keys(DEMO_RESPONSES).find(k => msg.includes(k)) || 'default'
+  return DEMO_RESPONSES[key]
+}
 
 export const documentsApi = {
   list: async (): Promise<Document[]> => {
@@ -69,8 +74,7 @@ export const documentsApi = {
 export const chatApi = {
   send: async (request: ChatRequest): Promise<ChatResponse> => {
     if (IS_DEMO) {
-      const key = Object.keys(DEMO_RESPONSES).find(k => request.message.toLowerCase().includes(k)) || 'default'
-      return { answer: DEMO_RESPONSES[key], sources: [] } as any
+      return { answer: matchDemoResponse(request), sources: [] } as any
     }
     const res = await api.post('/api/chat/', { ...request, stream: false })
     return res.data
@@ -83,8 +87,7 @@ export const chatApi = {
   ): (() => void) => {
     if (IS_DEMO) {
       let cancelled = false
-      const key = Object.keys(DEMO_RESPONSES).find(k => request.message.toLowerCase().includes(k)) || 'default'
-      const words = DEMO_RESPONSES[key].split(' ')
+      const words = matchDemoResponse(request).split(' ')
       ;(async () => {
         for (const word of words) {
           if (cancelled) return
