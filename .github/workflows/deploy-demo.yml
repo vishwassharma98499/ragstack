@@ -28,5 +28,5 @@ jobs:
           PUBLIC_URL: "/ragstack"
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/build
+          path: frontend/dist
       - uses: actions/deploy-pages@v4
